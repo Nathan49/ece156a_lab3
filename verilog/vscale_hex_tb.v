@@ -1,5 +1,9 @@
 `include "vscale_ctrl_constants.vh"
 `include "vscale_csr_addr_map.vh"
+`include "vscale_alu_ops.vh"
+
+// define paths to common modules for testing
+`define ALU DUT.vscale.pipeline.alu
 
 module vscale_hex_tb();
 
@@ -58,7 +62,7 @@ module vscale_hex_tb();
         end
 
         #100 reset = 0;
-        
+
     end // initial begin
 
     always @(posedge clk) begin
@@ -77,10 +81,38 @@ module vscale_hex_tb();
             end
         end
 
-
         if (reason) begin
             $display("*** FAILED *** (%s) after %d simulation cycles", reason, trace_count);
             $finish;
+        end
+
+        // ---------------        
+        //  DO TESTS HERE
+        // ---------------
+
+        // Unsigned overflow
+        if (
+                `ALU.op == `ALU_OP_ADD &&
+                !`ALU.out[31] && (`ALU.in1[31] || `ALU.in2[31])
+        ) begin
+            $display("Signed Overflow: %b + %b = %b",
+                `ALU.in1[31],
+                `ALU.in2[31],
+                `ALU.out[31]);
+        end
+
+        // Signed overflow
+        if (
+                `ALU.op == `ALU_OP_ADD &&
+                (
+                    `ALU.out[31] && !`ALU.in1[31] && !`ALU.in2[31] ||
+                    !`ALU.out[31] && `ALU.in1[31] && `ALU.in2[31]
+                )
+        ) begin
+            $display("Unsigned Overflow: %b + %b = %b",
+                `ALU.in1[31],
+                `ALU.in2[31],
+                `ALU.out[31]);
         end
     end
 

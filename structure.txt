@@ -1,0 +1,14 @@
+vscale_sim_top: DUT
+	vscale_core: vscale
+		vscale_hasti_bridge: imem_bridge
+		vscale_hasti_bridge: dmem_bridge
+		vscale_pipeline: pipeline
+			vscale_ctrl: ctrl
+			vscale_PC_mux: PCmux
+			vscale_regfile: regfile
+			vscale_imm_gen: imm_gen
+			vscale_src_a_mux: src_a_mux
+			vscale_src_b_mux: src_b_mux
+			vscale_alu: alu
+			vascale_mul_div: md
+	vscale_dp_hasti_sram: hasti_mem
