@@ -14,7 +14,7 @@ module vscale_hex_tb();
     reg [255:0]                reason = 0;
     reg [1023:0]               loadmem = 0;
     reg [1023:0]               vpdfile = 0;
-    reg [  63:0]               max_cycles = 0;
+    reg [  63:0]               max_cycles = 100;
     reg [  63:0]               trace_count = 0;
     integer                    stderr = 32'h80000002;
 
@@ -38,7 +38,10 @@ module vscale_hex_tb();
         reset = 1;
     end
 
-    always #5 clk = !clk;
+    always begin
+        #5 clk = !clk;
+    end
+    // always #5 clk = !clk;
 
     integer i = 0;
     integer j = 0;
@@ -53,8 +56,9 @@ module vscale_hex_tb();
                 end
             end
         end
-        // $vcdplusmemon();
+
         #100 reset = 0;
+        
     end // initial begin
 
     always @(posedge clk) begin
