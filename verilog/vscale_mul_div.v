@@ -113,6 +113,7 @@ module vscale_mul_div(
         end // case: s_compute
         s_setup_output : begin
            result <= {`XPR_LEN'b0,final_result};
+           $display("Result: %h", result);
         end
       endcase // case (state)
    end // always @ (posedge clk)

@@ -1,0 +1,10 @@
+Signed Overflow
+Data Bypass
+Unsigned Overflow
+Negative Subtraction
+Data Bypass
+Zero Mult
+Zero XOR
+Data Bypass
+Ones XOR
+Jumped
