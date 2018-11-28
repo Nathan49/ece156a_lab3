@@ -1,0 +1,7 @@
+This takes RISC v .s files and compiles them into hex files.
+
+To run, use:
+	python3 riscCompile.py [infile.s] [outfile.hex]
+
+For example:
+	python3 riscCompile.py test5.s hexFiles/test5.hex

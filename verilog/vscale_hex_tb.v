@@ -4,6 +4,9 @@
 
 // define paths to common modules for testing
 `define ALU DUT.vscale.pipeline.alu
+`define PC DUT.vscale.pipeline.PC_IF
+`define INSTR DUT.vscale.pipeline.inst_DX
+`define REGS DUT.vscale.pipeline.regfile.data
 
 module vscale_hex_tb();
 
@@ -18,7 +21,7 @@ module vscale_hex_tb();
     reg [255:0]                reason = 0;
     reg [1023:0]               loadmem = 0;
     reg [1023:0]               vpdfile = 0;
-    reg [  63:0]               max_cycles = 100;
+    reg [  63:0]               max_cycles = 200;
     reg [  63:0]               trace_count = 0;
     integer                    stderr = 32'h80000002;
 
@@ -52,13 +55,20 @@ module vscale_hex_tb();
 
     initial begin
         $display("starting");
-        if (loadmem) begin
-            $readmemh(loadmem, hexfile);
-            for (i = 0; i < hexfile_words; i = i + 1) begin
-                for (j = 0; j < 4; j = j + 1) begin
-                    DUT.hasti_mem.mem[4*i+j] = hexfile[i][32*j+:32];
-                end
-            end
+        loadmem = "hexFiles/tests.hex";
+        $readmemh(loadmem, DUT.hasti_mem.mem);
+
+        // if (loadmem) begin
+        //     $readmemh(loadmem, hexfile);
+        //     for (i = 0; i < hexfile_words; i = i + 1) begin
+        //         for (j = 0; j < 4; j = j + 1) begin
+        //             DUT.hasti_mem.mem[4*i+j] = hexfile[i][32*j+:32];
+        //         end
+        //     end
+        // end
+
+        for (i = 0; i < 32; i=i+ 1) begin
+            $display("%d: %h", i, DUT.hasti_mem.mem[i]);
         end
 
         #100 reset = 0;
@@ -67,6 +77,17 @@ module vscale_hex_tb();
 
     always @(posedge clk) begin
         trace_count = trace_count + 1;
+
+        // print out debug info
+        $display("Cycle %d, PC: %h, Instr: %h",
+            trace_count, `PC, `INSTR);
+
+        if (trace_count == 20) begin
+            $display("Registers:");
+            for (i = 0; i < 32; i=i+ 1) begin
+                $display("%d: %h", i, `REGS[i]);
+            end
+        end
 
         if (max_cycles > 0 && trace_count > max_cycles)
           reason = "timeout";
