@@ -56,16 +56,21 @@ def randomint(input):
 				feature_string[22] = 1
 		return s[2:]
 
-def feature_output(fstr):
+def feature_output(fstr, a, b):
+	a = int(a, 16)
+	b = int(b, 16)
 	if fstr[0] == 1: #add
 		fstr[30] = 0 #unsigned overflow
 		fstr[32] = 0 #signed overflow
 	elif fstr[2] == 1: #sub
-		fstr[34] = 0 #negative sub result
+		if a - b < 0:
+			fstr[34] = 1 #negative sub result
 	elif fstr[4] == 1: #xor
-		fstr[36] = 0 #xor zero
-		fstr[38] = 0 #xor all ones
-	else:
+		if a ^ b == 0:
+			fstr[36] = 1 #xor zero
+		elif a ^ b == int("ffffffff", 16):
+			fstr[38] = 1 #xor all ones
+	else: #mult
 		fstr[40] = int(fstr[8]) | int(fstr[10]) #zero mult result
 
 for i in range(100):
@@ -82,7 +87,7 @@ for i in range(100):
 	b = randomint('b')
 	file.write(b + "\n")
 	file2.write(b + "\n")
-	feature_output(feature_string)
+	feature_output(feature_string, a, b)
 	file3.write(''.join(str(e) for e in feature_string))
 
 file.close()
