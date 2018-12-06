@@ -2,3 +2,10 @@ a.out
 
 __pycache__/*
 */__pycache__/*
+generator/features.csv
+compiler/test.hex
+generator/assembly.txt
+generator/hex.txt
+hexFiles/temp.hex
+run/flags.txt
+run/temp.hex

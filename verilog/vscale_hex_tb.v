@@ -4,9 +4,11 @@
 
 // define paths to common modules for testing
 `define ALU         DUT.vscale.pipeline.alu
+`define ALU_WB      ~DUT.vscale.pipeline.stall_WB
 `define PC          DUT.vscale.pipeline.PC_IF
 `define INSTR       DUT.vscale.pipeline.inst_DX
 `define REGS        DUT.vscale.pipeline.regfile.data
+`define REG_WRITE   DUT.vscale.pipeline.regfile.wen_internal
 `define OP          DUT.vscale.pipeline.ctrl.opcode
 `define MUL_RES     DUT.vscale.pipeline.md.result
 `define MUL_STATE   DUT.vscale.pipeline.md.state
@@ -53,7 +55,7 @@ module vscale_hex_tb();
         reset = 1;
 
         // open file for writing
-        fid = $fopen("flags.txt", "w");
+        fid = $fopen("run/flags.txt", "w");
     end
 
     always begin
@@ -68,10 +70,11 @@ module vscale_hex_tb();
 
     integer i = 0;
     integer j = 0;
+    integer regwrites = 0;
 
     initial begin
         $display("starting");
-        loadmem = "hexFiles/tests.hex";
+        loadmem = "hexFiles/temp.hex";
         $readmemh(loadmem, DUT.hasti_mem.mem);
 
         // if (loadmem) begin
@@ -95,9 +98,14 @@ module vscale_hex_tb();
     always @(posedge clk) begin
         trace_count = trace_count + 1;
 
+        if (`REG_WRITE)
+            regwrites += 1;
+
+        #1;
+
         // print out debug info
-        $display("Cycle %d, PC: %h, Instr: %h",
-            trace_count, `PC, `INSTR);
+        $display("Cycle %d, regwrites: %d, ALU wb: %b, PC: %h, Instr: %h",
+            trace_count, regwrites, `ALU_WB, `PC, `INSTR);
 
         // if (trace_count == 20) begin
         //     $display("Registers:");
@@ -118,6 +126,14 @@ module vscale_hex_tb();
 
                 end
             end
+        end
+
+        if (regwrites == 3) begin
+            $display("Registers:");
+            for (i = 0; i < 32; i=i+ 1) begin
+                $display("%d: %h", i, `REGS[i]);
+            end
+            stop = 1;
         end
 
         if (reason) begin
@@ -177,6 +193,15 @@ module vscale_hex_tb();
             $fwrite(fid, "Zero Mult\n");
         end
 
+        if (
+            `ALU.op == `ALU_OP_XOR
+        ) begin
+            $display("XOR: %h ^ %h = %h",
+                `ALU.in1,
+                `ALU.in2,
+                `ALU.out);
+        end
+
         // XOR zero result
         if (
             `ALU.op == `ALU_OP_XOR &&
@@ -215,8 +240,9 @@ module vscale_hex_tb();
 
             if (`PIPELINE.bypass_rs2) begin
                 $display("RS2 Bypassed");
-                $fwrite(fid, "Data Bypass\n");
             end
+
+            $fwrite(fid, "Data Bypass\n");
         end
     end
 

@@ -1,0 +1,8 @@
+V1,V2,I3,V1==0,V1-ve,V2==0,V2-ve,I3==ADD,I3==MUL,I3==XOR,I3==SUB,cp_covered
+0000ffff,1,MUL,0,0,0,0,0,1,0,0,0
+0,1,MUL,1,0,0,0,0,1,0,0,1
+1,0,MUL,0,0,1,0,0,1,0,0,1
+ffffffff,0,MUL,0,1,1,0,0,1,0,0,1
+0,ffffffff,MUL,1,0,0,1,0,1,0,0,1
+ffffffff,0,ADD,0,1,1,0,1,0,0,0,0
+0,ffffffff,ADD,1,0,0,1,1,0,0,0,0
