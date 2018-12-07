@@ -99,7 +99,7 @@ module vscale_hex_tb();
         trace_count = trace_count + 1;
 
         if (`REG_WRITE)
-            regwrites += 1;
+            regwrites = regwrites + 1;
 
         #1;
 
