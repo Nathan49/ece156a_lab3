@@ -55,6 +55,21 @@ Learning for flag Negative Subtraction:
     else:  # if ![sub]
         return False
 
+Learning for flag Negative Subtraction:
+    if [sub]:
+        if [b_signed > a_signed]:
+            if [a_signed - b_signed] < -2^31:
+                return False
+            else:
+                return True
+        else:  # if ![b_signed > a_signed]
+            if [a_signed - b_signed] > 2^31:
+                return True
+            else:
+                return False
+    else:  # if ![sub]
+        return False
+
 Learning for flag Zero Mult:
     if [mul]:
         if [a + b >= 2^32]:
