@@ -1,24 +1,50 @@
 import random
-exec(open('generator/featureList.py').read())
 file = open("generator/assembly.txt", "w")
 file2 = open("generator/hex.txt", "w")
 file3 = open("generator/features.csv", "w")
 
-file3.write("add, sub, xor, mult, a = 0, b = 0, a = ffffffff, b = ffffffff, a < 0, b < 0, a > 0, b > 0, ass < 0, bs < 0, ass > 0, bs > 0, unsigned overflow, signed overflow, negative sub result, xor zero, xor all ones, zero mult result, jump, data bypass\n")
+featureList = [
+    "add",
+    "sub",
+    "xor",
+    "mult",
+    "a = 0",
+    "b = 0",
+    "a = ffffffff",
+    "b = ffffffff",
+    "a < 0",
+    "b < 0",
+    "a > 0",
+    "b > 0",
+    "ass < 0",
+    "bs < 0",
+    "ass > 0",
+    "bs > 0",
+    "unsigned overflow",
+    "signed overflow",
+    "negative sub result",
+    "xor zero",
+    "xor all ones",
+    "zero mult result",
+    "jump",
+    "data bypass"
+]
+
+file3.write(', '.join(featureList) + '\n')
 
 featureMap = {}
 
 def I():
-	x = random.randint(0, 50)
-	if x < 15:
+	x = random.randint(0, 100)
+	if x < 25:
 		featureMap["add"] = True
 		file2.write("005303b3\n")
 		return "add"
-	elif 15 <= x < 30:
+	elif x < 50:
 		featureMap["sub"] = True
 		file2.write("405303b3\n")
 		return "sub"
-	elif 30 <= x < 40:
+	elif x < 75:
 		featureMap["xor"] = True
 		file2.write("005343b3\n")
 		return "xor"
@@ -87,11 +113,12 @@ for i in range(500):
 	for key in featureList:
 		featureMap[key] = False
 	file.write("lw $t0, $0, 12\n")
-	file2.write("00c02283\n")
+	file2.write("01002283\n")
 	file.write("lw $t1, $0, 16\n")
-	file2.write("01002303\n")
+	file2.write("01402303\n")
 	file.write(I() + " $t2, $t0, $t1\n")
 	#file.write("end:\n")
+	file2.write('0000006f\n')
 	a = randomint('a')
 	file.write(a + "\n")
 	file2.write(a + "\n")

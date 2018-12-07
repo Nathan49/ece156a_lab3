@@ -87,8 +87,12 @@ module vscale_hex_tb();
         // end
 
         $display("Loaded Instructions:");
-        for (i = 0; i < 32; i=i+ 1) begin
+        for (i = 0; i < 6; i=i+ 1) begin
             $display("%d: %h", i, DUT.hasti_mem.mem[i]);
+        end
+
+        for (i = 0; i < 32; i = i + 1) begin
+            `REGS[i] = 0;
         end
 
         #100 reset = 0;
@@ -129,10 +133,10 @@ module vscale_hex_tb();
         end
 
         if (regwrites == 3) begin
-            $display("Registers:");
-            for (i = 0; i < 32; i=i+ 1) begin
-                $display("%d: %h", i, `REGS[i]);
-            end
+            // $display("Registers:");
+            // for (i = 0; i < 32; i=i+ 1) begin
+            //     $display("%d: %h", i, `REGS[i]);
+            // end
             stop = 1;
         end
 

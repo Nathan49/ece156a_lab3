@@ -11,7 +11,7 @@ def tree_to_code(tree, feature_names):
     # print ("def tree({}):".format(", ".join(feature_names)))
 
     def recurse(node, depth):
-        indent = "  " * depth
+        indent = "    " * depth
         if tree_.feature[node] != _tree.TREE_UNDEFINED:
             name = feature_name[node]
             threshold = tree_.threshold[node]
@@ -20,9 +20,11 @@ def tree_to_code(tree, feature_names):
             print ("{}else:  # if [{}] > {}".format(indent, name, threshold))
             recurse(tree_.children_right[node], depth + 1)
         else:
-            pass
-            # print ("{}return {}".format(indent, tree_.value[node][0][0] < tree_.value[node][0][1]))
-            #print ("{}return {}".format(indent, tree_.value[node]))
+            try:
+                print ("{}return {}".format(indent, tree_.value[node][0][0] < tree_.value[node][0][1]))
+                # print ("{}return {}".format(indent, tree_.value[node]))
+            except:
+                print("{}???".format(indent))
 
     recurse(0, 1)
 

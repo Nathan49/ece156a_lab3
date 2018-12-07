@@ -51,7 +51,7 @@ def main():
         if i == 0:
             progs.append('')
         i += 1
-        if i == 5:
+        if i == 6:
             i = 0
         progs[-1] += line
 

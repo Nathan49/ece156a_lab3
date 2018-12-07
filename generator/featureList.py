@@ -1,4 +1,4 @@
-featureList = (
+featureList = [
     "add",
     "sub",
     "xor",
@@ -23,4 +23,4 @@ featureList = (
     "zero mult result",
     "jump",
     "data bypass"
-)
+]
