@@ -8,6 +8,11 @@ runSim:
 learns:
 	python3 learn/learn.py
 
+everything:
+	make generate
+	make runSim
+	make learns
+
 # writes genertor/features.txt
 #                /hex.txt
 generate:

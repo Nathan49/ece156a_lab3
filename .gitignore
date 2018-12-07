@@ -9,3 +9,5 @@ generator/hex.txt
 hexFiles/temp.hex
 run/flags.txt
 run/temp.hex
+compiler/out.hex
+run/out.txt

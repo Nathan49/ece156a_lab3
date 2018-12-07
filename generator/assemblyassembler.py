@@ -1,5 +1,5 @@
 import random
-from featureList import featureList
+exec(open('generator/featureList.py').read())
 file = open("generator/assembly.txt", "w")
 file2 = open("generator/hex.txt", "w")
 file3 = open("generator/features.csv", "w")
@@ -7,33 +7,6 @@ file3 = open("generator/features.csv", "w")
 file3.write("add, sub, xor, mult, a = 0, b = 0, a = ffffffff, b = ffffffff, a < 0, b < 0, a > 0, b > 0, ass < 0, bs < 0, ass > 0, bs > 0, unsigned overflow, signed overflow, negative sub result, xor zero, xor all ones, zero mult result, jump, data bypass\n")
 
 featureMap = {}
-
-# featureList = (
-# 	"add",
-# 	"sub",
-# 	"xor",
-# 	"mult",
-# 	"a = 0",
-# 	"b = 0",
-# 	"a = ffffffff",
-# 	"b = ffffffff",
-# 	"a < 0",
-# 	"b < 0",
-# 	"a > 0",
-# 	"b > 0",
-# 	"ass < 0",
-# 	"bs < 0",
-# 	"ass > 0",
-# 	"bs > 0",
-# 	"unsigned overflow",
-# 	"signed overflow",
-# 	"negative sub result",
-# 	"xor zero",
-# 	"xor all ones",
-# 	"zero mult result",
-# 	"jump",
-# 	"data bypass"
-# )
 
 def I():
 	x = random.randint(0, 50)
@@ -110,7 +83,7 @@ def feature_output(a, b):
 	else: #mult
 		featureMap["zero mult result"] = featureMap["a = 0"] | featureMap["b = 0"] #zero mult result
 
-for i in range(100):
+for i in range(500):
 	for key in featureList:
 		featureMap[key] = False
 	file.write("lw $t0, $0, 12\n")
