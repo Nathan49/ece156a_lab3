@@ -20,6 +20,9 @@ everything:
 generate:
 	python3 generator/generate.py
 
+compile:
+	python3 compiler/riscCompile.py compiler/test.s compiler/out.hex
+
 clean:
 	rm -f a.out generator/features.csv generator/hex.txt
 	rm -rf __pycache__ compiler/__pycache__

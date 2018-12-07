@@ -1,0 +1,24 @@
+
+Learning for flag Unsigned Overflow:
+    ???
+
+Learning for flag Signed Overflow:
+    ???
+
+Learning for flag Negative Subtraction:
+    ???
+
+Learning for flag Zero Mult:
+    ???
+
+Learning for flag Zero XOR:
+    ???
+
+Learning for flag Ones XOR:
+    ???
+
+Learning for flag Jumped:
+    ???
+
+Learning for flag Data Bypass:
+    ???

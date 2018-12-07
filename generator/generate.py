@@ -1,5 +1,7 @@
 from random import randint
 
+nTests = 1000
+
 featureNames = [
     "add",
     "sub",
@@ -17,7 +19,8 @@ featureNames = [
     "a_signed > 0",
     "b_signed > 0",
     "a_signed + b_signed >= 2^31",
-    "a_signed + b_signed < -2^31"
+    "a_signed + b_signed < -2^31",
+    "b_signed > a_signed"
 ]
 
 def randHex():
@@ -83,6 +86,8 @@ def getTestFeatures(test):
         features["a_signed + b_signed >= 2^31"] = True
     elif a_signed + b_signed < -2**31:
         features["a_signed + b_signed < -2^31"] = True
+    if b_signed > a_signed:
+        features["b_signed > a_signed"] = True
     return features
 
 def getHexNum(n):
@@ -94,13 +99,13 @@ def getHex(test):
     res = '01002283\n01402303\n'
     op = test['op']
     if op == 'add':
-        res += '005303b3'
+        res += '006283b3'
     elif op == 'sub':
-        res += '405303b3'
+        res += '406283b3'
     elif op == 'xor':
-        res += '005343b3'
+        res += '0062c3b3'
     elif op == 'mul':
-        res += '025303b3'
+        res += '026283b3'
     res += '\n0000006f\n'
     res += getHexNum(test['a']) + '\n'
     res += getHexNum(test['b']) + '\n'
@@ -120,12 +125,24 @@ for fn in featureNames:
 hexFile = open('generator/hex.txt', 'w')
 featuresFile = open('generator/features.csv', 'w')
 featuresFile.write(','.join(featureNames)+'\n')
-for i in range(10):
+for i in range(nTests):
     test = makeTest()
+    # test = {'op': 'sub', 'a': 0xfffffff0, 'b': 0x10}
     features = getTestFeatures(test)
     hx = getHex(test)
     fStr = getFeatureStr(features)
     hexFile.write(hx)
     featuresFile.write(fStr+'\n')
+
+    # print('op: {}, a: {}, b: {}'.format(
+    #     test['op'],
+    #     hex(test['a']),
+    #     hex(test['b'])
+    # ))
+    # for f in features:
+    #     if features[f]:
+    #         print(f)
+    # # print(features)
+    # print(hx)
 hexFile.close()
 featuresFile.close()

@@ -1,7 +1,7 @@
 from sklearn.tree import DecisionTreeClassifier
 import pandas as pd
 
-def tree_to_code(tree, feature_names):
+def tree_to_code(tree, feature_names, outFile):
     from sklearn.tree import _tree
     tree_ = tree.tree_
     feature_name = [
@@ -15,18 +15,31 @@ def tree_to_code(tree, feature_names):
         if tree_.feature[node] != _tree.TREE_UNDEFINED:
             name = feature_name[node]
             threshold = tree_.threshold[node]
-            print ("{}if [{}] <= {}:".format(indent, name, threshold))
-            recurse(tree_.children_left[node], depth + 1)
-            print ("{}else:  # if [{}] > {}".format(indent, name, threshold))
+            print ("{}if [{}]:".format(indent, name))
+            outFile.write("{}if [{}]:\n".format(indent, name))
             recurse(tree_.children_right[node], depth + 1)
+            print ("{}else:  # if ![{}]".format(indent, name))
+            outFile.write("{}else:  # if ![{}]\n".format(indent, name))
+            recurse(tree_.children_left[node], depth + 1)
+            # print ("{}if [{}] <= {}:".format(indent, name, threshold))
+            # recurse(tree_.children_left[node], depth + 1)
+            # print ("{}else:  # if [{}] > {}".format(indent, name, threshold))
+            # recurse(tree_.children_right[node], depth + 1)
         else:
             try:
-                print ("{}return {}".format(indent, tree_.value[node][0][0] < tree_.value[node][0][1]))
+                txt = "{}return {}".format(indent, tree_.value[node][0][0] < tree_.value[node][0][1])
+                print(txt)
+                outFile.write(txt+'\n')
                 # print ("{}return {}".format(indent, tree_.value[node]))
             except:
                 print("{}???".format(indent))
+                outFile.write("{}???\n".format(indent))
 
     recurse(0, 1)
+
+def writeTree(tree, featureNames, fout):
+    tree_ = tree.tree_
+    print(tree)
 
 with open('run/out.txt', 'r') as f:
     featureNames = f.readline()[:-1].split(',')
@@ -56,10 +69,12 @@ with open('run/out.txt', 'r') as f:
     trainingData = pd.DataFrame(data=d)
 
 featureMatrix = trainingData[featureNames].values
+outFile = open('learn/out.txt', 'w')
 for flag in flagNames:
     labels = trainingData[flag].values
 
-    print("\nLearning for flag "+flag)
+    print("\nLearning for flag "+flag+":")
+    outFile.write("\nLearning for flag "+flag+":\n")
     # print("Feature Matrix:")
     # print(featureMatrix)
     # print("Labels:")
@@ -67,7 +82,8 @@ for flag in flagNames:
     clf = DecisionTreeClassifier(random_state=0)
     clf.fit(featureMatrix,labels)
 
-    tree_to_code(clf,featureNames)
+    tree_to_code(clf,featureNames,outFile)
+outFile.close()
 
 def main():
     features = ['V1==0','V1-ve' ,'V2==0','V2-ve','I3==ADD','I3==MUL','I3==XOR','I3==SUB']

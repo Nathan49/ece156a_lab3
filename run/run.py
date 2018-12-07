@@ -2,6 +2,7 @@ from subprocess import call
 
 flagList = [
     "Unsigned Overflow",
+    "Signed Overflow",
     "Negative Subtraction",
     "Zero Mult",
     "Zero XOR",

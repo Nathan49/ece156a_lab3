@@ -7,9 +7,12 @@
 `define ALU_WB      ~DUT.vscale.pipeline.stall_WB
 `define PC          DUT.vscale.pipeline.PC_IF
 `define INSTR       DUT.vscale.pipeline.inst_DX
+`define INSTRS      DUT.hasti_mem.mem
 `define REGS        DUT.vscale.pipeline.regfile.data
 `define REG_WRITE   DUT.vscale.pipeline.regfile.wen_internal
 `define OP          DUT.vscale.pipeline.ctrl.opcode
+`define FUNC7       DUT.vscale.pipeline.ctrl.funct7
+`define FUNC3       DUT.vscale.pipeline.ctrl.funct3
 `define MUL_RES     DUT.vscale.pipeline.md.result
 `define MUL_STATE   DUT.vscale.pipeline.md.state
 `define PC_SRC      DUT.vscale.pipeline.PC_src_sel
@@ -32,6 +35,10 @@ module vscale_hex_tb();
     reg [  63:0]               trace_count = 0;
     integer                    stderr = 32'h80000002;
     integer fid;
+
+    integer addState = 0;
+    integer subState = 0;
+    integer xorState = 0;
 
     reg [127:0]                hexfile [hexfile_words-1:0];
 
@@ -86,10 +93,10 @@ module vscale_hex_tb();
         //     end
         // end
 
-        $display("Loaded Instructions:");
-        for (i = 0; i < 6; i=i+ 1) begin
-            $display("%d: %h", i, DUT.hasti_mem.mem[i]);
-        end
+        // $display("Loaded Instructions:");
+        // for (i = 0; i < 6; i=i+ 1) begin
+        //     $display("%d: %h", i, DUT.hasti_mem.mem[i]);
+        // end
 
         for (i = 0; i < 32; i = i + 1) begin
             `REGS[i] = 0;
@@ -107,9 +114,66 @@ module vscale_hex_tb();
 
         #1;
 
+        // ---------------
+        //  Update States
+        // ---------------
+        case (addState)
+            0: begin
+                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b000) begin
+                    addState = 1;
+                end
+            end
+            1: begin
+                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b000) begin
+                    addState = 2;
+                end else begin
+                    addState = 0;
+                end
+            end
+            2: begin
+                addState = 0;
+            end
+        endcase
+
+        case (subState)
+            0: begin
+                if (`OP == 7'b0110011 && `FUNC7 == 7'b0100000 && `FUNC3 == 3'b000) begin
+                    subState = 1;
+                end
+            end
+            1: begin
+                if (`OP == 7'b0110011 && `FUNC7 == 7'b0100000 && `FUNC3 == 3'b000) begin
+                    subState = 2;
+                end else begin
+                    subState = 0;
+                end
+            end
+            2: begin
+                subState = 0;
+            end
+        endcase
+
+        case (xorState)
+            0: begin
+                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b100) begin
+                    xorState = 1;
+                end
+            end
+            1: begin
+                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b100) begin
+                    xorState = 2;
+                end else begin
+                    xorState = 0;
+                end
+            end
+            2: begin
+                xorState = 0;
+            end
+        endcase
+
         // print out debug info
-        $display("Cycle %d, regwrites: %d, ALU wb: %b, PC: %h, Instr: %h",
-            trace_count, regwrites, `ALU_WB, `PC, `INSTR);
+        // $display("Cycle %d, regwrites: %d, opcode: %b, func7: %b, , add: %d, , sub: %d, xor: %d, PC: %h, Instr: %h",
+        //     trace_count, regwrites, `OP, `FUNC7, addState, subState, xorState, `PC, `INSTR);
 
         // if (trace_count == 20) begin
         //     $display("Registers:");
@@ -150,84 +214,80 @@ module vscale_hex_tb();
         //  DO TESTS HERE
         // ---------------
 
-        // Unsigned overflow
-        if (
-            `ALU.op == `ALU_OP_ADD &&
-            !`ALU.out[31] && (`ALU.in1[31] || `ALU.in2[31])
-        ) begin
-            $display("Signed Overflow: %b + %b = %b",
-                `ALU.in1[31],
-                `ALU.in2[31],
-                `ALU.out[31]);
-            $fwrite(fid, "Signed Overflow\n");
-        end
-
-
-
-        // Signed overflow
-        if (
-            `ALU.op == `ALU_OP_ADD &&
-            (
-                `ALU.out[31] && !`ALU.in1[31] && !`ALU.in2[31] ||
-                !`ALU.out[31] && `ALU.in1[31] && `ALU.in2[31]
-            )
-        ) begin
-            $display("Unsigned Overflow: %b + %b = %b",
-                `ALU.in1[31],
-                `ALU.in2[31],
-                `ALU.out[31]);
-            $fwrite(fid, "Unsigned Overflow\n");
-        end
-
-        // Negative result from subtraction
-        if (
-            `ALU.op == `ALU_OP_SUB &&
-            `ALU.out[31]
-        ) begin
-            $display("Negative Subtraction: %h - %h = %h",
+        if (addState == 2) begin
+            $display("%h + %h = %h",
                 `ALU.in1,
                 `ALU.in2,
                 `ALU.out);
-            $fwrite(fid, "Negative Subtraction\n");
+
+            // unsigned overflow
+            if (
+                    `ALU.in1[31] && `ALU.in2[31] ||
+                    !`ALU.out[31] && (`ALU.in1[31] || `ALU.in2[31])
+            ) begin
+                $display("Unsigned Overflow: %b + %b = %b",
+                    `ALU.in1[31],
+                    `ALU.in2[31],
+                    `ALU.out[31]);
+                $fwrite(fid, "Unsigned Overflow\n");
+            end
+
+            // signed overflow
+            if (
+                    `ALU.out[31] && !`ALU.in1[31] && !`ALU.in2[31] ||
+                    !`ALU.out[31] && `ALU.in1[31] && `ALU.in2[31]
+                ) begin
+                    $display("Signed Overflow: %b + %b = %b",
+                        `ALU.in1[31],
+                        `ALU.in2[31],
+                        `ALU.out[31]);
+                    $fwrite(fid, "Signed Overflow\n");
+            end
+        end
+
+        if (subState == 2) begin
+            $display("%h - %h = %h",
+                `ALU.in1,
+                `ALU.in2,
+                `ALU.out);
+
+            // negative result from subtraction
+            if (`ALU.out[31]) begin
+                $display("Negative Subtraction: %h - %h = %h",
+                    `ALU.in1,
+                    `ALU.in2,
+                    `ALU.out);
+                $fwrite(fid, "Negative Subtraction\n");
+            end
         end
 
         // Zero Output with multiplication
         if (`MUL_STATE == 2 && `MUL_RES == 0) begin
-            $display("Zero Multiplication: %h", `MUL_RES);
+            $display("Zero Multiplication: %h * %h = %h", `INSTRS[4], `INSTRS[5], `MUL_RES);
             $fwrite(fid, "Zero Mult\n");
         end
 
-        if (
-            `ALU.op == `ALU_OP_XOR
-        ) begin
-            $display("XOR: %h ^ %h = %h",
+        if (xorState == 2) begin
+            $display("%h ^ %h = %h",
                 `ALU.in1,
                 `ALU.in2,
                 `ALU.out);
-        end
 
-        // XOR zero result
-        if (
-            `ALU.op == `ALU_OP_XOR &&
-            `ALU.out == 0
-        ) begin
-            $display("Zero XOR: %h ^ %h = %h",
-                `ALU.in1,
-                `ALU.in2,
-                `ALU.out);
-            $fwrite(fid, "Zero XOR\n");
-        end
+            if (`ALU.out == 0) begin
+                $display("Zero XOR: %h ^ %h = %h",
+                    `ALU.in1,
+                    `ALU.in2,
+                    `ALU.out);
+                $fwrite(fid, "Zero XOR\n");
+            end
 
-        // all ones XOR result
-        if (
-            `ALU.op == `ALU_OP_XOR &&
-            `ALU.out == 32'hffffffff
-        ) begin
-            $display("Ones XOR: %h ^ %h = %h",
-                `ALU.in1,
-                `ALU.in2,
-                `ALU.out);
-            $fwrite(fid, "Ones XOR\n");
+            if (`ALU.out == 32'hffffffff) begin
+                $display("Ones XOR: %h ^ %h = %h",
+                    `ALU.in1,
+                    `ALU.in2,
+                    `ALU.out);
+                $fwrite(fid, "Ones XOR\n");
+            end
         end
 
         // a jump happened
