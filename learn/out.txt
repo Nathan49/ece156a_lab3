@@ -9,71 +9,44 @@ Learning for flag Unsigned Overflow:
         return False
 
 Learning for flag Signed Overflow:
-    if [a_signed + b_signed >= 2^31]:
+    if [a_signed + b_signed < -2^31]:
         if [add]:
             return True
         else:  # if ![add]
             return False
-    else:  # if ![a_signed + b_signed >= 2^31]
-        if [a_signed + b_signed < -2^31]:
+    else:  # if ![a_signed + b_signed < -2^31]
+        if [a_signed + b_signed >= 2^31]:
             if [add]:
                 return True
             else:  # if ![add]
                 return False
-        else:  # if ![a_signed + b_signed < -2^31]
+        else:  # if ![a_signed + b_signed >= 2^31]
             return False
 
 Learning for flag Negative Subtraction:
     if [sub]:
         if [b_signed > a_signed]:
-            if [b_signed > 0]:
-                if [a_signed < 0]:
-                    if [a == ffffffff]:
-                        return True
-                    else:  # if ![a == ffffffff]
-                        if [a + b >= 2^32]:
-                            return False
-                        else:  # if ![a + b >= 2^32]
-                            return True
-                else:  # if ![a_signed < 0]
-                    return True
-            else:  # if ![b_signed > 0]
+            if [a_signed - b_signed < -2^31]:
+                return False
+            else:  # if ![a_signed - b_signed < -2^31]
                 return True
         else:  # if ![b_signed > a_signed]
-            if [a_signed > 0]:
-                if [b_signed < 0]:
-                    if [b == ffffffff]:
-                        return False
-                    else:  # if ![b == ffffffff]
-                        if [a + b >= 2^32]:
-                            return False
-                        else:  # if ![a + b >= 2^32]
-                            return True
-                else:  # if ![b_signed < 0]
-                    return False
-            else:  # if ![a_signed > 0]
+            if [a_signed - b_signed >= 2^31]:
+                return True
+            else:  # if ![a_signed - b_signed >= 2^31]
                 return False
     else:  # if ![sub]
         return False
 
 Learning for flag Zero Mult:
     if [mul]:
-        if [a + b >= 2^32]:
-            return False
-        else:  # if ![a + b >= 2^32]
-            if [b_signed > 0]:
-                if [a == 0]:
-                    return True
-                else:  # if ![a == 0]
-                    return False
-            else:  # if ![b_signed > 0]
-                if [a_signed > 0]:
-                    if [b == 0]:
-                        return True
-                    else:  # if ![b == 0]
-                        return False
-                else:  # if ![a_signed > 0]
-                    return True
+        if [a == 0]:
+            return True
+        else:  # if ![a == 0]
+            if [b == 0]:
+                return True
+            else:  # if ![b == 0]
+                return False
     else:  # if ![mul]
         return False
 

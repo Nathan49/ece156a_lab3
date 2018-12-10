@@ -3,24 +3,26 @@ from random import randint
 nTests = 1000
 
 featureNames = [
-    "add",
-    "sub",
-    "xor",
-    "mul",
-    "a == 0",
-    "a == ffffffff",
-    "b == 0",
-    "b == ffffffff",
-    "a == b",
-    "a == !b",
-    "a + b >= 2^32",
-    "a_signed < 0",
-    "b_signed < 0",
-    "a_signed > 0",
-    "b_signed > 0",
-    "a_signed + b_signed >= 2^31",
-    "a_signed + b_signed < -2^31",
-    "b_signed > a_signed"
+    'add',
+    'sub',
+    'xor',
+    'mul',
+    'a == 0',
+    'a == ffffffff',
+    'b == 0',
+    'b == ffffffff',
+    'a == b',
+    'a == !b',
+    'a + b >= 2^32',
+    'a_signed < 0',
+    'b_signed < 0',
+    'a_signed > 0',
+    'b_signed > 0',
+    'a_signed + b_signed >= 2^31',
+    'a_signed + b_signed < -2^31',
+    'b_signed > a_signed',
+    'a_signed - b_signed < -2^31',
+    'a_signed - b_signed >= 2^31'
 ]
 
 def randHex():
@@ -88,6 +90,10 @@ def getTestFeatures(test):
         features["a_signed + b_signed < -2^31"] = True
     if b_signed > a_signed:
         features["b_signed > a_signed"] = True
+    if a_signed - b_signed < -2**31:
+        features['a_signed - b_signed < -2^31'] = True
+    if a_signed - b_signed >= 2**31:
+        features['a_signed - b_signed >= 2^31'] = True
     return features
 
 def getHexNum(n):
