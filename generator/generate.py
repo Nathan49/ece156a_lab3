@@ -7,6 +7,7 @@ featureNames = [
     'sub',
     'xor',
     'mul',
+    'jal',
     'a == 0',
     'a == ffffffff',
     'b == 0',
@@ -22,8 +23,14 @@ featureNames = [
     'a_signed + b_signed < -2^31',
     'b_signed > a_signed',
     'a_signed - b_signed < -2^31',
-    'a_signed - b_signed >= 2^31'
+    'a_signed - b_signed >= 2^31',
+    'rs1 == t2',
+    'rs2 == t2'
 ]
+
+opcodes = ['add', 'sub', 'xor', 'mul', 'jal']
+
+regMap = ['00101', '00110', '00111']
 
 def randHex():
     x = randint(0,99)
@@ -34,17 +41,15 @@ def randHex():
     else:
         return randint(0,2**32-1)
 
+def randOpCode():
+    return opcodes[randint(0,len(opcodes)-1)]
+
 def makeTest():
     res = {}
-    x = randint(0, 99)
-    if x < 25:
-        res['op'] = 'add'
-    elif x < 50:
-        res['op'] = 'sub'
-    elif x < 75:
-        res['op'] = 'xor'
-    else:
-        res['op'] = 'mul'
+    res['op'] = opcodes[randint(0,3)]
+    res['op2'] = opcodes[randint(0,4)]
+    res['rs1'] = randint(0,2)
+    res['rs2'] = randint(0,2)
 
     res['a'] = randHex()
     res['b'] = randHex()
@@ -58,6 +63,13 @@ def getTestFeatures(test):
     for fn in featureNames:
         features[fn] = False
     features[test['op']] = True
+    if test['op2'] == 'jal':
+        features['jal'] = True
+    else:
+        if test['rs1'] == 2:
+            features['rs1 == t2'] = True
+        elif test['rs2'] == 2:
+            features['rs2 == t2'] = True
     a = test['a']
     b = test['b']
     if a == 0:
@@ -101,6 +113,18 @@ def getHexNum(n):
     res = '0'*(8-len(res)) + res
     return res
 
+def getInstrHex(op, rs1, rs2):
+    res = ''
+    if op == 'add':
+        res += '0000000' + regMap[rs2] + regMap[rs1] + '000' + regMap[2] + '0110011'
+    elif op == 'sub':
+        res += '0100000' + regMap[rs2] + regMap[rs1] + '000' + regMap[2] + '0110011'
+    elif op == 'xor':
+        res += '0000000' + regMap[rs2] + regMap[rs1] + '100' + regMap[2] + '0110011'
+    elif op == 'mul':
+        res += '0000001' + regMap[rs2] + regMap[rs1] + '000' + regMap[2] + '0110011'
+    return getHexNum(int(res, 2))
+
 def getHex(test):
     res = '01002283\n01402303\n'
     op = test['op']
@@ -112,6 +136,11 @@ def getHex(test):
         res += '0062c3b3'
     elif op == 'mul':
         res += '026283b3'
+    res += '\n'
+    if test['op2'] == 'jal':
+        res += '0040006f'
+    else:
+        res += getInstrHex(test['op2'], test['rs1'], test['rs2'])
     res += '\n0000006f\n'
     res += getHexNum(test['a']) + '\n'
     res += getHexNum(test['b']) + '\n'
@@ -137,9 +166,14 @@ for i in range(nTests):
     features = getTestFeatures(test)
     hx = getHex(test)
     fStr = getFeatureStr(features)
+
+    # print(test)
+    # print(features)
+    # print(hx)
+    # continue
+
     hexFile.write(hx)
     featuresFile.write(fStr+'\n')
-
     # print('op: {}, a: {}, b: {}'.format(
     #     test['op'],
     #     hex(test['a']),

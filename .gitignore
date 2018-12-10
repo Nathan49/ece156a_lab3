@@ -2,6 +2,8 @@ a.out
 
 __pycache__/*
 */__pycache__/*
+submission/*
+ece156a_hw3.zip
 generator/features.csv
 compiler/test.hex
 generator/assembly.txt

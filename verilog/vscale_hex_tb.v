@@ -119,12 +119,12 @@ module vscale_hex_tb();
         // ---------------
         case (addState)
             0: begin
-                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b000) begin
+                if (`MUL_STATE == 0 && `OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b000) begin
                     addState = 1;
                 end
             end
             1: begin
-                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b000) begin
+                if (`MUL_STATE == 0 && `OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b000) begin
                     addState = 2;
                 end else begin
                     addState = 0;
@@ -137,12 +137,12 @@ module vscale_hex_tb();
 
         case (subState)
             0: begin
-                if (`OP == 7'b0110011 && `FUNC7 == 7'b0100000 && `FUNC3 == 3'b000) begin
+                if (`MUL_STATE == 0 && `OP == 7'b0110011 && `FUNC7 == 7'b0100000 && `FUNC3 == 3'b000) begin
                     subState = 1;
                 end
             end
             1: begin
-                if (`OP == 7'b0110011 && `FUNC7 == 7'b0100000 && `FUNC3 == 3'b000) begin
+                if (`MUL_STATE == 0 && `OP == 7'b0110011 && `FUNC7 == 7'b0100000 && `FUNC3 == 3'b000) begin
                     subState = 2;
                 end else begin
                     subState = 0;
@@ -155,12 +155,12 @@ module vscale_hex_tb();
 
         case (xorState)
             0: begin
-                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b100) begin
+                if (`MUL_STATE == 0 && `OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b100) begin
                     xorState = 1;
                 end
             end
             1: begin
-                if (`OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b100) begin
+                if (`MUL_STATE == 0 && `OP == 7'b0110011 && `FUNC7 == 7'b0000000 && `FUNC3 == 3'b100) begin
                     xorState = 2;
                 end else begin
                     xorState = 0;
@@ -172,8 +172,8 @@ module vscale_hex_tb();
         endcase
 
         // print out debug info
-        // $display("Cycle %d, regwrites: %d, opcode: %b, func7: %b, , add: %d, , sub: %d, xor: %d, PC: %h, Instr: %h",
-        //     trace_count, regwrites, `OP, `FUNC7, addState, subState, xorState, `PC, `INSTR);
+        // $display("Cycle %d, regwrites: %d, opcode: %b, func7: %b, , add: %d, , sub: %d, xor: %d, PC: %h, Instr: %h, MulState: %d",
+        //     trace_count, regwrites, `OP, `FUNC7, addState, subState, xorState, `PC, `INSTR, `MUL_STATE);
 
         // if (trace_count == 20) begin
         //     $display("Registers:");
@@ -196,12 +196,13 @@ module vscale_hex_tb();
             end
         end
 
-        if (regwrites == 3) begin
+        if (`INSTR == 32'h0000006f) begin
+        // if (regwrites == 4) begin
             // $display("Registers:");
             // for (i = 0; i < 32; i=i+ 1) begin
             //     $display("%d: %h", i, `REGS[i]);
             // end
-            stop = 1;
+            stop = 1;#1;
         end
 
         if (reason) begin
@@ -213,7 +214,6 @@ module vscale_hex_tb();
         // ---------------        
         //  DO TESTS HERE
         // ---------------
-
         if (addState == 2) begin
             $display("%h + %h = %h",
                 `ALU.in1,

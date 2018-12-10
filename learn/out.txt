@@ -1,75 +1,51 @@
 
 Learning for flag Unsigned Overflow:
-    if [add]:
-        if [a + b >= 2^32]:
-            return True
-        else:  # if ![a + b >= 2^32]
-            return False
-    else:  # if ![add]
-        return False
-
-Learning for flag Signed Overflow:
-    if [a_signed + b_signed < -2^31]:
+    if [a == ffffffff]:
         if [add]:
             return True
         else:  # if ![add]
             return False
-    else:  # if ![a_signed + b_signed < -2^31]
-        if [a_signed + b_signed >= 2^31]:
-            if [add]:
-                return True
-            else:  # if ![add]
-                return False
-        else:  # if ![a_signed + b_signed >= 2^31]
-            return False
+    else:  # if ![a == ffffffff]
+        return False
+
+Learning for flag Signed Overflow:
+    ???
 
 Learning for flag Negative Subtraction:
     if [sub]:
-        if [b_signed > a_signed]:
-            if [a_signed - b_signed < -2^31]:
-                return False
-            else:  # if ![a_signed - b_signed < -2^31]
-                return True
-        else:  # if ![b_signed > a_signed]
-            if [a_signed - b_signed >= 2^31]:
-                return True
-            else:  # if ![a_signed - b_signed >= 2^31]
-                return False
+        if [a_signed > 0]:
+            return True
+        else:  # if ![a_signed > 0]
+            return False
     else:  # if ![sub]
         return False
 
 Learning for flag Zero Mult:
-    if [mul]:
-        if [a == 0]:
+    if [a == 0]:
+        if [mul]:
             return True
-        else:  # if ![a == 0]
-            if [b == 0]:
-                return True
-            else:  # if ![b == 0]
-                return False
-    else:  # if ![mul]
+        else:  # if ![mul]
+            return False
+    else:  # if ![a == 0]
         return False
 
 Learning for flag Zero XOR:
-    if [a == b]:
-        if [xor]:
-            return True
-        else:  # if ![xor]
-            return False
-    else:  # if ![a == b]
-        return False
+    ???
 
 Learning for flag Ones XOR:
-    if [a == !b]:
-        if [xor]:
-            return True
-        else:  # if ![xor]
-            return False
-    else:  # if ![a == !b]
-        return False
+    ???
 
 Learning for flag Jumped:
-    ???
+    if [jal]:
+        return True
+    else:  # if ![jal]
+        return False
 
 Learning for flag Data Bypass:
-    ???
+    if [rs1 == t2]:
+        return True
+    else:  # if ![rs1 == t2]
+        if [rs2 == t2]:
+            return True
+        else:  # if ![rs2 == t2]
+            return False
